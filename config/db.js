@@ -10,8 +10,8 @@ require('dotenv').config()
 //     dateStrings: 'date',
 // });
 
-//
-const connection = mysql.createConnection(process.env.DB_URL);
+//const connection = mysql.createConnection(process.env.DB_URL);
+const connection = mysql.createConnection('mysql://3RSh6d36QBZx1fa.root:07mpHgW08fzOnJ4g@gateway01.ap-southeast-1.prod.aws.tidbcloud.com:4000/test?ssl={"rejectUnauthorized":true}');
 
 
 connection.connect(function(err) {
