@@ -3,6 +3,6 @@
   node_bundler = "esbuild"
 [[redirects]]
   force = true
-  from = "/kru-asset-library/api/*"
+  from = "/api/*"
   status = 200
-  to = "/.netlify/functions/kru-asset-library/api/:splat"
+  to = "/.netlify/functions/api/:splat"

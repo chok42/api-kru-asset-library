@@ -1,4 +1,4 @@
-const mysql = require('mysql2');
+const mysql2 = require('mysql2');
 require('dotenv').config()
 //ในเครื่อง
 // const pool1 = mariadb.createPool({
@@ -10,18 +10,33 @@ require('dotenv').config()
 //     dateStrings: 'date',
 // });
 
-//const connection = mysql.createConnection(process.env.DB_URL);
-const connection = mysql.createConnection('mysql://3RSh6d36QBZx1fa.root:07mpHgW08fzOnJ4g@gateway01.ap-southeast-1.prod.aws.tidbcloud.com:4000/test?ssl={"rejectUnauthorized":true}');
+const options = {
+  host: process.env.TIDB_HOST || '127.0.0.1',
+  port: process.env.TIDB_PORT || 3306,
+  user: process.env.TIDB_USER || 'root',
+  password: process.env.TIDB_PASSWORD || '',
+  database: process.env.TIDB_DATABASE || 'kru_asset_library_db',
+  ssl: process.env.TIDB_ENABLE_SSL === 'true' ? {
+     minVersion: 'TLSv1.2',
+     ca: process.env.TIDB_CA_PATH ? fs.readFileSync(process.env.TIDB_CA_PATH) : undefined
+  } : null,
+}
+
+const conn = mysql2.createConnection(options);
+//const connection = createConnection('mysql://3RSh6d36QBZx1fa.root:07mpHgW08fzOnJ4g@gateway01.ap-southeast-1.prod.aws.tidbcloud.com:4000/test?ssl={"rejectUnauthorized":true}');
 
 
-connection.connect(function(err) {
-  if (err) {
-      console.error('error connecting: ' + err.stack);
-      return;
-  }
-  console.log('connected as id ' + connection.threadId);
-});
+// // Connect to the MySQL server
+// connection.connect((error) => {
+//   if (error) {
+//     console.error('Error connecting to MySQL:', error);
+//     return;
+//   }
+//   console.log('Connected to MySQL server.');
+//   connection.end();
+// });
+//conn.end();
 
 module.exports = Object.freeze({
-  kal_db:connection.promise(),
+  kal_db:conn.promise(),
 });

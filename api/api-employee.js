@@ -44,6 +44,8 @@ router.post('/login', async (req, res) => {
     
       } catch (err) {
         res.send({ status: "500", message: 'ERROR',detail:err.message });
+      } finally {
+        kal_db.end();
       }
 });
 
@@ -95,6 +97,8 @@ router.post('/authen', async (req, res) => {
     
       } catch (err) {
         res.send({ status: "500", message: 'ERROR',detail:err.message });
+      } finally {
+        kal_db.end();
       }
 });
 
@@ -163,6 +167,8 @@ router.post('/register', async (req, res) => {
     
       } catch (err) {
         res.send({ status: "500", message: 'ERROR',detail:err.message });
+      } finally {
+        kal_db.end();
       }
 });
 

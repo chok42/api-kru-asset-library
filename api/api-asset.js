@@ -29,24 +29,34 @@ router.post('/get', async (req, res) => {
         let query_type = ''
 
         if(json['asset_is_used']){
-          query_is_used = `asset_is_used = '${json['asset_is_used']}' AND `
+          query_is_used = `ASS.asset_is_used = '${json['asset_is_used']}' AND `
         }
         if(json['asset_status_id']){
-          query_status = `asset_status_id = '${json['asset_status_id']}' AND `
+          query_status = `ASS.asset_status_id = '${json['asset_status_id']}' AND `
         }
 
         if(json['agency_id']){
-          query_agency = `agency_id = '${json['agency_id']}' AND `
+          query_agency = `ASS.agency_id = '${json['agency_id']}' AND `
         }
 
         if(json['asset_type_id']){
-          query_type = `asset_type_id = ${json['asset_type_id']} AND `
+          query_type = `ASS.asset_type_id = ${json['asset_type_id']} AND `
         }
 
         const query_search = `${query_is_used}${query_status}${query_agency}${query_type}`
 
         const [res_total] = await kal_db.query(`SELECT COUNT(*) AS total FROM trans_asset`);
-        const [res_asset] = await kal_db.query(`SELECT * FROM trans_asset WHERE ${query_search} asset_code LIKE '%' ? '%' LIMIT ? OFFSET ?`,[json['search'],pageSize,offset]);
+        const [res_asset] = await kal_db.query(`
+          SELECT ASS.*
+          ,ATY.asset_type_name 
+          ,AGE.agency_name
+          ,AST.asset_status_name
+          FROM trans_asset ASS
+          LEFT JOIN mas_asset_type    AS ATY ON ATY.asset_type_id = ASS.asset_type_id
+          LEFT JOIN mas_agency        AS AGE ON AGE.agency_id = ASS.agency_id
+          LEFT JOIN mas_asset_status  AS AST ON AST.asset_status_id = ASS.asset_status_id
+          WHERE ${query_search} ASS.asset_code LIKE '%' ? '%' LIMIT ? OFFSET ?`,[json['search'],pageSize,offset]);
+          
 
         if (res_asset) {
           
@@ -71,7 +81,10 @@ router.post('/get', async (req, res) => {
          });
     
       } catch (err) {
+       
         res.send({ status: "500", message: 'ERROR',detail:err.message });
+      } finally {
+        kal_db.end();
       }
 });
 
@@ -108,6 +121,8 @@ router.post('/getbyid', async (req, res) => {
   
     } catch (err) {
       res.send({ status: "500", message: 'ERROR',detail:err.message });
+    } finally {
+      kal_db.end();
     }
 });
 
@@ -186,6 +201,8 @@ router.post('/insert', async (req, res) => {
     
       } catch (err) {
         res.send({ status: "500", message: 'ERROR',detail:err.message });
+      } finally {
+        kal_db.end();
       }
 });
 
@@ -259,13 +276,14 @@ router.post('/update', async (req, res) => {
     });
   } catch (err) {
     res.send({ status: "500", message: "ERROR", detail: err.message });
+  } finally {
+    kal_db.end();
   }
 });
 
 router.post('/update-status', async (req, res) => {
   try {
     const json = req.body;
-    
 
     if (!json) {
       res.send({
@@ -276,19 +294,17 @@ router.post('/update-status', async (req, res) => {
       return;
     }
 
-    const [res_asset] = await kal_db.query(`SELECT * FROM trans_asset WHERE asset_id = ?`,[json["asset_id"]]);
-    
+    const [res_asset] = await kal_db.query(
+      `SELECT * FROM trans_asset WHERE asset_id = ?`,
+      [json["asset_id"]]
+    );
 
     if (res_asset && res_asset.length > 0) {
       await kal_db.query(
         `
         UPDATE trans_asset SET asset_status_id = ?  WHERE asset_id = ?`,
-        [
-          json["asset_status_id"],
-          json["asset_id"],
-        ]
+        [json["asset_status_id"], json["asset_id"]]
       );
-      
 
       res.send({
         status: "200",
@@ -305,6 +321,8 @@ router.post('/update-status', async (req, res) => {
     });
   } catch (err) {
     res.send({ status: "500", message: "ERROR", detail: err.message });
+  } finally {
+    kal_db.end();
   }
 });
 
@@ -351,6 +369,8 @@ router.post('/update-isused', async (req, res) => {
     });
   } catch (err) {
     res.send({ status: "500", message: "ERROR", detail: err.message });
+  } finally {
+    kal_db.end();
   }
 });
 
@@ -379,6 +399,8 @@ router.post('/delete', async (req, res) => {
   
     } catch (err) {
       res.send({ status: "500", message: 'ERROR',detail:err.message });
+    } finally {
+      kal_db.end();
     }
 });
 
@@ -395,6 +417,8 @@ router.post('/test', async (req, res) => {
     });
     } catch (err) {
       res.send({ status: "500", message: 'ERROR',detail:err.message });
+    } finally {
+      kal_db.end();
     }
 });
 
