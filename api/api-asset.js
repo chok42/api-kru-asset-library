@@ -81,10 +81,7 @@ router.post('/get', async (req, res) => {
          });
     
       } catch (err) {
-       
         res.send({ status: "500", message: 'ERROR',detail:err.message });
-      } finally {
-        kal_db.end();
       }
 });
 
@@ -121,8 +118,6 @@ router.post('/getbyid', async (req, res) => {
   
     } catch (err) {
       res.send({ status: "500", message: 'ERROR',detail:err.message });
-    } finally {
-      kal_db.end();
     }
 });
 
@@ -201,8 +196,6 @@ router.post('/insert', async (req, res) => {
     
       } catch (err) {
         res.send({ status: "500", message: 'ERROR',detail:err.message });
-      } finally {
-        kal_db.end();
       }
 });
 
@@ -276,14 +269,13 @@ router.post('/update', async (req, res) => {
     });
   } catch (err) {
     res.send({ status: "500", message: "ERROR", detail: err.message });
-  } finally {
-    kal_db.end();
   }
 });
 
 router.post('/update-status', async (req, res) => {
   try {
     const json = req.body;
+    
 
     if (!json) {
       res.send({
@@ -294,17 +286,19 @@ router.post('/update-status', async (req, res) => {
       return;
     }
 
-    const [res_asset] = await kal_db.query(
-      `SELECT * FROM trans_asset WHERE asset_id = ?`,
-      [json["asset_id"]]
-    );
+    const [res_asset] = await kal_db.query(`SELECT * FROM trans_asset WHERE asset_id = ?`,[json["asset_id"]]);
+    
 
     if (res_asset && res_asset.length > 0) {
       await kal_db.query(
         `
         UPDATE trans_asset SET asset_status_id = ?  WHERE asset_id = ?`,
-        [json["asset_status_id"], json["asset_id"]]
+        [
+          json["asset_status_id"],
+          json["asset_id"],
+        ]
       );
+      
 
       res.send({
         status: "200",
@@ -321,8 +315,6 @@ router.post('/update-status', async (req, res) => {
     });
   } catch (err) {
     res.send({ status: "500", message: "ERROR", detail: err.message });
-  } finally {
-    kal_db.end();
   }
 });
 
@@ -369,8 +361,6 @@ router.post('/update-isused', async (req, res) => {
     });
   } catch (err) {
     res.send({ status: "500", message: "ERROR", detail: err.message });
-  } finally {
-    kal_db.end();
   }
 });
 
@@ -399,8 +389,6 @@ router.post('/delete', async (req, res) => {
   
     } catch (err) {
       res.send({ status: "500", message: 'ERROR',detail:err.message });
-    } finally {
-      kal_db.end();
     }
 });
 
@@ -417,8 +405,6 @@ router.post('/test', async (req, res) => {
     });
     } catch (err) {
       res.send({ status: "500", message: 'ERROR',detail:err.message });
-    } finally {
-      kal_db.end();
     }
 });
 
