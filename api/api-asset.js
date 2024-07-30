@@ -218,6 +218,13 @@ router.post('/update', async (req, res) => {
     
 
     if (res_asset && res_asset.length > 0) {
+      const resAsset = res_asset[0]
+
+      if(json["asset_image"]){
+        removefile(resAsset.asset_image)
+        addfile(resAsset.asset_code,json["asset_image"])
+      }
+
       await kal_db.query(
         `
         UPDATE trans_asset SET asset_name = ?
@@ -230,8 +237,7 @@ router.post('/update', async (req, res) => {
         ,asset_is_used = ?
         ,asset_status_id = ?
         ,agency_id = ?
-        ,asset_type_id = ? 
-        ,asset_image = ? WHERE asset_id = ?`,
+        ,asset_type_id = ? WHERE asset_id = ?`,
         [
           json["asset_name"],
           json["asset_model"],
@@ -244,15 +250,9 @@ router.post('/update', async (req, res) => {
           json["asset_status_id"],
           json["agency_id"],
           json["asset_type_id"],
-          json['asset_image'],
-          json["asset_id"],
-          
+          json["asset_id"],         
         ]
       );
-
-      if(json["image"]){
-        removefile(json['asset_image'])
-      }
 
       res.send({
         status: "200",
