@@ -11,11 +11,11 @@ require('dotenv').config()
 // });
 
 const options = {
-  host: process.env.TIDB_HOST || '127.0.0.1',
-  port: process.env.TIDB_PORT || 3306,
-  user: process.env.TIDB_USER || 'root',
-  password: process.env.TIDB_PASSWORD || '',
-  database: process.env.TIDB_DATABASE || 'kru_asset_library_db',
+  host: process.env.TIDB_HOST,
+  port: process.env.TIDB_PORT,
+  user: process.env.TIDB_USER ,
+  password: process.env.TIDB_PASSWORD ,
+  database: process.env.TIDB_DATABASE ,
   ssl: process.env.TIDB_ENABLE_SSL === 'true' ? {
      minVersion: 'TLSv1.2',
      ca: process.env.TIDB_CA_PATH ? fs.readFileSync(process.env.TIDB_CA_PATH) : undefined
@@ -23,6 +23,7 @@ const options = {
 }
 
 const conn = mysql2.createConnection(options);
+
 //const connection = createConnection('mysql://3RSh6d36QBZx1fa.root:07mpHgW08fzOnJ4g@gateway01.ap-southeast-1.prod.aws.tidbcloud.com:4000/test?ssl={"rejectUnauthorized":true}');
 
 

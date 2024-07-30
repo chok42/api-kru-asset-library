@@ -191,7 +191,7 @@ router.post('/insert', async (req, res) => {
       res.send({
           status: "200",
           message: "SUCCESS",
-          detail:"Login successful"
+          detail:"successful"
       });
     
       } catch (err) {
@@ -257,7 +257,7 @@ router.post('/update', async (req, res) => {
       res.send({
         status: "200",
         message: "SUCCESS",
-        detail: "Login successful",
+        detail: "successful",
       });
       return;
     }
@@ -303,7 +303,7 @@ router.post('/update-status', async (req, res) => {
       res.send({
         status: "200",
         message: "SUCCESS",
-        detail: "Login successful",
+        detail: "successful",
       });
       return;
     }
@@ -349,7 +349,7 @@ router.post('/update-isused', async (req, res) => {
       res.send({
         status: "200",
         message: "SUCCESS",
-        detail: "Login successful",
+        detail: "successful",
       });
       return;
     }
@@ -384,7 +384,7 @@ router.post('/delete', async (req, res) => {
       res.send({
           status: "200",
           message: "SUCCESS",
-          detail:"Login successful"
+          detail:"successful"
       });
   
     } catch (err) {
@@ -401,7 +401,7 @@ router.post('/test', async (req, res) => {
       res.send({
         status: "200",
         message: "SUCCESS",
-        detail:"Login successful"
+        detail:"successful"
     });
     } catch (err) {
       res.send({ status: "500", message: 'ERROR',detail:err.message });
