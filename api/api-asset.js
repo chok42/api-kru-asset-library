@@ -275,8 +275,7 @@ router.post('/update', async (req, res) => {
 router.post('/update-status', async (req, res) => {
   try {
     const json = req.body;
-    
-
+  
     if (!json) {
       res.send({
         status: "400",
@@ -322,7 +321,6 @@ router.post('/update-isused', async (req, res) => {
   try {
     const json = req.body;
     
-
     if (!json) {
       res.send({
         status: "400",

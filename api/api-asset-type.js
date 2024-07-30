@@ -181,7 +181,7 @@ router.post('/delete', async (req, res) => {
   try {
       const json = req.body;
       
-      if (!json['asset_id']) {
+      if (!json['asset_type_id']) {
         res.send({
           status: "400",
           message: "WARNING",
@@ -190,7 +190,7 @@ router.post('/delete', async (req, res) => {
         return;
       } 
 
-      await kal_db.query(`DELETE FROM trans_asset WHERE asset_id = ?`,[json["asset_id"]]);        
+      await kal_db.query(`DELETE FROM mas_asset_type WHERE asset_type_id = ?`,[json["asset_type_id"]]);        
       
       res.send({
           status: "200",
