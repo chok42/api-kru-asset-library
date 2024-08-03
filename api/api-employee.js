@@ -1,7 +1,6 @@
 const express = require('express');
 const router = express.Router();
 var md5 = require('md5');
-const { uuid } = require('uuidv4');
 const {kal_db} = require("../config/db");
 
 router.post('/login', async (req, res) => {
@@ -76,21 +75,20 @@ router.post('/authen', async (req, res) => {
             ,json["role_id"]]);
 
         
-
-        if(!res_emp || !res_emp[0]){
-            res.send({
-                status: "404",
-                message: "WARNING",
-                detail:"Duplicate Data"
-            });
-            return
+        if (res_emp && res_emp.length > 0) {
+          res.send({
+            data: res_emp[0],
+            status: "200",
+            message: "SUCCESS",
+            detail: "Authen successful",
+          });
+          return;
         }
 
         res.send({
-            data:res_emp[0],
-            status: "200",
-            message: "SUCCESS",
-            detail:"Authen successful"
+          status: "404",
+          message: "WARNING",
+          detail: "No Data",
         });
     
       } catch (err) {
@@ -154,7 +152,6 @@ router.post('/register', async (req, res) => {
             ,"1"]);
             
         
-
         res.send({
             status: "200",
             message: "SUCCESS",

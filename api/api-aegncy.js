@@ -51,6 +51,32 @@ router.post('/get', async (req, res) => {
       }
 });
 
+router.post('/get-list', async (req, res) => {
+  try {
+
+      const [res_agency] = await kal_db.query(`SELECT * FROM mas_agency`);
+
+      if (res_agency) {
+        res.send({
+          data: res_agency,
+          status: "200",
+          message: "SUCCESS",
+          detail: "successful",
+        });
+        return;
+      }
+
+       res.send({
+         status: "404",
+         message: "WARNING",
+         detail: "No Data",
+       });
+  
+    } catch (err) {
+      res.send({ status: "500", message: 'ERROR',detail:err.message });
+    }
+});
+
 router.post('/getbyid', async (req, res) => {
   try {
       const json = req.body;

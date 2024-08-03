@@ -8,21 +8,21 @@ const apiAssetType = require("./api-asset-type");
 const apiAgency = require("./api-aegncy");
 
 router.use(cors());
-router.use(express.json({ limit: "50mb" }));
+router.use(express.json({ limit: "1024mb" }));
 router.use(
   express.urlencoded({
-    limit: "50mb",
+    limit: "1024mb",
     extended: true,
-    parameterLimit: 500000,
+    // parameterLimit: 500000,
   })
 );
 
-router.use(bodyParser.json({ limit: "50mb" }));
+router.use(bodyParser.json({ limit: "1024mb" }));
 router.use(
   bodyParser.urlencoded({
-    limit: "50mb",
+    limit: "1024mb",
     extended: true,
-    parameterLimit: 500000,
+    // parameterLimit: 500000,
   })
 );
 

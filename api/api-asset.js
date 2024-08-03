@@ -6,6 +6,7 @@ const {kal_db} = require("../config/db");
 const { addfile, removefile } = require('../constants/constant');
 
 //get
+//asset
 router.post('/get', async (req, res) => {
     try {
         const json = req.body;
@@ -98,7 +99,18 @@ router.post('/getbyid', async (req, res) => {
         return;
       }
 
-      const [res_asset] = await kal_db.query(`SELECT * FROM trans_asset WHERE asset_id = ?`,json['asset_id']);
+      const [res_asset] = await kal_db
+      .query(`
+          SELECT ASS.*
+          ,ATY.asset_type_name 
+          ,AGE.agency_name
+          ,AST.asset_status_name
+          FROM trans_asset ASS
+          LEFT JOIN mas_asset_type    AS ATY ON ATY.asset_type_id = ASS.asset_type_id
+          LEFT JOIN mas_agency        AS AGE ON AGE.agency_id = ASS.agency_id
+          LEFT JOIN mas_asset_status  AS AST ON AST.asset_status_id = ASS.asset_status_id
+          WHERE asset_id = ?`,json['asset_id']
+        );
 
       if (res_asset && res_asset.length > 0) {
         res.send({
@@ -116,6 +128,31 @@ router.post('/getbyid', async (req, res) => {
          detail: "No Data",
        });
   
+    } catch (err) {
+      res.send({ status: "500", message: 'ERROR',detail:err.message });
+    }
+});
+
+// asset status
+router.post('/get-list-status', async (req, res) => {
+  try {
+      const [res_asset] = await kal_db.query(`SELECT *  FROM mas_asset_status`);
+      if (res_asset) {
+        res.send({
+          data: res_asset,
+          status: "200",
+          message: "SUCCESS",
+          detail: "successful",
+        });
+        return;
+      }
+  
+      res.send({
+        status: "404",
+        message: "WARNING",
+        detail: "No Data",
+      });
+
     } catch (err) {
       res.send({ status: "500", message: 'ERROR',detail:err.message });
     }
@@ -176,13 +213,13 @@ router.post('/insert', async (req, res) => {
           ,json["asset_description"]
           ,json["asset_price"]
           ,new Date()
-          ,json["asset_start_date"]
+          ,json["asset_start_date"] ? json["asset_start_date"] : null
           ,json["asset_building_code"]
           ,json["asset_is_used"]
           ,json["asset_status_id"]
           ,json["agency_id"]
           ,json["asset_type_id"]
-          ,`images/${json["asset_code"]}.png`]);
+          ,json['asset_image'] ? `images/${json["asset_code"]}.png` : null]);
           
       if(json['asset_image']){
         addfile(json["asset_code"],json['asset_image'])
@@ -203,7 +240,6 @@ router.post('/insert', async (req, res) => {
 router.post('/update', async (req, res) => {
   try {
     const json = req.body;
-    
 
     if (!json) {
       res.send({
@@ -216,7 +252,6 @@ router.post('/update', async (req, res) => {
 
     const [res_asset] = await kal_db.query(`SELECT * FROM trans_asset WHERE asset_id = ?`,[json["asset_id"]]);
     
-
     if (res_asset && res_asset.length > 0) {
       const resAsset = res_asset[0]
 
@@ -238,7 +273,8 @@ router.post('/update', async (req, res) => {
         ,asset_status_id = ?
         ,agency_id = ?
         ,asset_type_id = ? 
-        ,asset_image = ? WHERE asset_id = ?`,
+        ,asset_image = ?
+        ,emp_id = ? WHERE asset_id = ?`,
         [
           json["asset_name"],
           json["asset_model"],
@@ -252,7 +288,8 @@ router.post('/update', async (req, res) => {
           json["agency_id"],
           json["asset_type_id"],
           `images/${resAsset.asset_code}.png`,
-          json["asset_id"],         
+          json["asset_id"],  
+          json["emp_id"],        
         ]
       );
 
@@ -261,6 +298,7 @@ router.post('/update', async (req, res) => {
         message: "SUCCESS",
         detail: "successful",
       });
+
       return;
     }
 
