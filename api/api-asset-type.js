@@ -65,11 +65,11 @@ router.post('/get-list', async (req, res) => {
         });
         return;
       }
-       res.send({
-         status: "404",
-         message: "WARNING",
-         detail: "No Data",
-       });
+      res.send({
+        status: "404",
+        message: "WARNING",
+        detail: "No Data",
+      });
   
     } catch (err) {
       res.send({ status: "500", message: 'ERROR',detail:err.message });

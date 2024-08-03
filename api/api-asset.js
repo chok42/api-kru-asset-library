@@ -46,7 +46,14 @@ router.post('/get', async (req, res) => {
 
         const query_search = `${query_is_used}${query_status}${query_agency}${query_type}`
 
-        const [res_total] = await kal_db.query(`SELECT COUNT(*) AS total FROM trans_asset`);
+        const [res_total] = await kal_db.query(`
+          SELECT COUNT(*) AS total 
+          FROM trans_asset ASS
+          LEFT JOIN mas_asset_type    AS ATY ON ATY.asset_type_id = ASS.asset_type_id
+          LEFT JOIN mas_agency        AS AGE ON AGE.agency_id = ASS.agency_id
+          LEFT JOIN mas_asset_status  AS AST ON AST.asset_status_id = ASS.asset_status_id
+          WHERE ${query_search} CONCAT_WS(' ', ASS.asset_code, ASS.asset_name ,ASS.asset_building_code)  LIKE '%' ? '%'`,[json['search']]);
+          
         const [res_asset] = await kal_db.query(`
           SELECT ASS.*
           ,ATY.asset_type_name 
@@ -56,13 +63,12 @@ router.post('/get', async (req, res) => {
           LEFT JOIN mas_asset_type    AS ATY ON ATY.asset_type_id = ASS.asset_type_id
           LEFT JOIN mas_agency        AS AGE ON AGE.agency_id = ASS.agency_id
           LEFT JOIN mas_asset_status  AS AST ON AST.asset_status_id = ASS.asset_status_id
-          WHERE ${query_search} ASS.asset_code LIKE '%' ? '%' LIMIT ? OFFSET ?`,[json['search'],pageSize,offset]);
+          WHERE ${query_search} CONCAT_WS(' ', ASS.asset_code, ASS.asset_name ,ASS.asset_building_code)  LIKE '%' ? '%' LIMIT ? OFFSET ?`,[json['search'],pageSize,offset]);
           
 
         if (res_asset) {
-          
-        let total = parseInt(res_total[0].total);
-        let totalPages = Math.ceil(total / pageSize);
+          let total = parseInt(res_total[0].total);
+          let totalPages = Math.ceil(total / pageSize);
 
           res.send({
             data: res_asset,
@@ -174,9 +180,9 @@ router.post('/insert', async (req, res) => {
       }
 
       let asset_id = 1
-      const [res_total] = await kal_db.query(`SELECT COUNT(*) AS total FROM trans_asset`);
+      const [res_total] = await kal_db.query(`SELECT asset_id  FROM trans_asset ORDER BY asset_id DESC`);
       if(res_total && res_total.length > 0){
-        asset_id = res_total[0].total + 1
+        asset_id = res_total[0].asset_id + 1
       }
 
       const [res_asset] = await kal_db.query(` SELECT * FROM trans_asset WHERE asset_code = ?` ,[json["asset_code"]]);
@@ -416,15 +422,24 @@ router.post('/delete', async (req, res) => {
         });
         return;
       } 
-
-      await kal_db.query(`DELETE FROM trans_asset WHERE asset_id = ?`,[json["asset_id"]]);        
       
-      res.send({
+      const [res_asset] = await kal_db.query(`SELECT * FROM trans_asset WHERE asset_id = ?`,[json["asset_id"]]);
+      if(res_asset && res_asset.length > 0){
+        await kal_db.query(`DELETE FROM trans_asset WHERE asset_id = ?`,[json["asset_id"]]);     
+        res.send({
           status: "200",
           message: "SUCCESS",
-          detail:"successful"
+          detail: "successful",
+        });   
+        return
+      }
+      
+      res.send({
+        status: "404",
+        message: "WARNING",
+        detail: "No Data",
       });
-  
+
     } catch (err) {
       res.send({ status: "500", message: 'ERROR',detail:err.message });
     }
