@@ -3,8 +3,6 @@ const express = require('express');
 const router = express.Router();
 const {kal_db} = require("../config/db");
 
-const { addfile, removefile } = require('../constants/constant');
-
 //get
 router.post('/get', async (req, res) => {
     try {
@@ -23,7 +21,7 @@ router.post('/get', async (req, res) => {
         let pageSize = parseInt(json['pageSize']) || 10;
         let offset = (page - 1) * pageSize;
 
-        const [res_total] = await kal_db.query(`SELECT COUNT(*) AS total FROM mas_asset_type`);
+        const [res_total] = await kal_db.query(`SELECT COUNT(*) AS total FROM mas_asset_type WHERE asset_type_name LIKE '%' ? '%'`,[json['search']]);
         const [res_asset] = await kal_db.query(`SELECT * FROM mas_asset_type WHERE asset_type_name LIKE '%' ? '%' LIMIT ? OFFSET ?`,[json['search'],pageSize,offset]);
           
         if (res_asset) {
@@ -127,15 +125,15 @@ router.post('/insert', async (req, res) => {
         return;
       }
 
-      let asset_id = 1
-      const [res_total] = await kal_db.query(`SELECT COUNT(*) AS total FROM mas_asset_type`);
+      let asset_type_id = 1
+      const [res_total] = await kal_db.query(`SELECT asset_type_id FROM mas_asset_type ORDER BY asset_type_id DESC`);
       if(res_total && res_total.length > 0){
-        asset_id = res_total[0].total + 1
+        asset_type_id = res_total[0].asset_type_id + 1
       }
 
-      const [res_asset] = await kal_db.query(` SELECT * FROM mas_asset_type WHERE asset_type_name = ?` ,[json["asset_type_name"]]);
+      const [res_assetType] = await kal_db.query(` SELECT * FROM mas_asset_type WHERE asset_type_name = ?` ,[json["asset_type_name"]]);
 
-      if(res_asset && res_asset.length > 0){
+      if(res_assetType && res_assetType.length > 0){
           res.send({
               status: "404",
               message: "WARNING",
@@ -144,7 +142,7 @@ router.post('/insert', async (req, res) => {
           return
       }
 
-      await kal_db.query(`INSERT INTO mas_asset_type (asset_type_id,asset_type_name) VALUES (?,?)`,[asset_id,json['asset_type_name']]);
+      await kal_db.query(`INSERT INTO mas_asset_type (asset_type_id,asset_type_name) VALUES (?,?)`,[asset_type_id,json['asset_type_name']]);
           
       res.send({
           status: "200",

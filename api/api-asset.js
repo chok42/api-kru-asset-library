@@ -426,6 +426,9 @@ router.post('/delete', async (req, res) => {
       const [res_asset] = await kal_db.query(`SELECT * FROM trans_asset WHERE asset_id = ?`,[json["asset_id"]]);
       if(res_asset && res_asset.length > 0){
         await kal_db.query(`DELETE FROM trans_asset WHERE asset_id = ?`,[json["asset_id"]]);     
+        
+        removefile(res_asset[0].asset_image)
+
         res.send({
           status: "200",
           message: "SUCCESS",
