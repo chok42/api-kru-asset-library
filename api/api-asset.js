@@ -426,7 +426,7 @@ router.post('/delete', async (req, res) => {
       const [res_asset] = await kal_db.query(`SELECT * FROM trans_asset WHERE asset_id = ?`,[json["asset_id"]]);
       if(res_asset && res_asset.length > 0){
         await kal_db.query(`DELETE FROM trans_asset WHERE asset_id = ?`,[json["asset_id"]]);     
-        
+
         removefile(res_asset[0].asset_image)
 
         res.send({
@@ -448,20 +448,5 @@ router.post('/delete', async (req, res) => {
     }
 });
 
-router.post('/test', async (req, res) => {
-  try {
-      const json = req.body;
-
-      //addfile(json['name'],json['image'])
-      removefile(`images/${json['name']}`)
-      res.send({
-        status: "200",
-        message: "SUCCESS",
-        detail:"successful"
-    });
-    } catch (err) {
-      res.send({ status: "500", message: 'ERROR',detail:err.message });
-    }
-});
 
 module.exports = router;

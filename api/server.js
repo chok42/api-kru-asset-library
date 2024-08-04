@@ -6,6 +6,7 @@ const apiEmployee = require("./api-employee");
 const apiAsset = require("./api-asset");
 const apiAssetType = require("./api-asset-type");
 const apiAgency = require("./api-aegncy");
+const apiRole = require("./api-role");
 
 router.use(cors());
 router.use(express.json({ limit: "1024mb" }));
@@ -33,5 +34,6 @@ router.use("/employee", apiEmployee);
 router.use("/asset", apiAsset);
 router.use("/asset-type", apiAssetType);
 router.use("/agency", apiAgency);
+router.use("/role", apiRole);
 
 module.exports = router;
