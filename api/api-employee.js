@@ -118,7 +118,7 @@ router.post('/get', async (req, res) => {
       let role_id = ''
 
       if(json['role_id']){
-        role_id = `EMP.role_id = '${json['role_id']}' AND `
+        role_id = `EMP.role_id = '${json['role_id']}' AND`
       }
 
       const query_search = `${role_id}`
@@ -126,8 +126,8 @@ router.post('/get', async (req, res) => {
       const [res_total] = await kal_db.query(`SELECT COUNT(*) AS total FROM mas_employee`);
       const [res_emp] = await kal_db.query(`
         SELECT EMP.*,ROL.role_name FROM mas_employee AS EMP 
-        LEFT JOIN mas_role AS ROL ON ROL.role_id = EMP.role_id
-        WHERE ${query_search} EMP.emp_status != 1 AND CONCAT_WS(' ', EMP.emp_firstname, EMP.emp_lastname ,EMP.emp_username) LIKE '%' ? '%' LIMIT ? OFFSET ?`,[json['search'],pageSize,offset]);
+        LEFT JOIN mas_role AS ROL ON ROL.role_id = EMP.role_id 
+        WHERE ${query_search} EMP.role_id != 1 AND EMP.emp_status = 1 AND CONCAT_WS(' ', EMP.emp_firstname, EMP.emp_lastname ,EMP.emp_username) LIKE '%' ? '%' LIMIT ? OFFSET ?`,[json['search'],pageSize,offset]);
         
       if (res_emp) {
         
@@ -203,7 +203,6 @@ router.post('/insert', async (req, res) => {
     try {
         const json = req.body;
         
-
         if (!json) {
           res.send({
             status: "400",
@@ -213,16 +212,7 @@ router.post('/insert', async (req, res) => {
           return;
         }
 
-        const [res_emp] = await kal_db.query(`
-            SELECT * FROM mas_employee 
-            WHERE emp_id = ?
-            OR emp_username = ? 
-            OR emp_email = ?`
-            ,[json["emp_id"]
-            ,json["emp_username"]
-            ,json["emp_email"]]);
-
-        
+        const [res_emp] = await kal_db.query(`SELECT * FROM mas_employee WHERE emp_username = ?`,[json["emp_username"]]);
 
         if(res_emp && res_emp[0]){
             res.send({
@@ -233,8 +223,14 @@ router.post('/insert', async (req, res) => {
             return
         }
 
-        await conn
-        .query(`
+        let emp_id = 1
+        const [res_total] = await kal_db.query(`SELECT emp_id  FROM mas_employee ORDER BY emp_id DESC`);
+        if(res_total && res_total.length > 0){
+          emp_id = res_total[0].emp_id + 1
+        }
+
+        await kal_db.query(
+          `
             INSERT INTO mas_employee (emp_id
             ,emp_username
             ,emp_password
@@ -243,15 +239,19 @@ router.post('/insert', async (req, res) => {
             ,emp_phone
             ,emp_email
             ,emp_status
-            ,role_id) VALUES (?,?,?,?,?,?,?,?,?)`,[json["emp_id"]
-            ,json["emp_username"]
-            ,md5(json["emp_password"]).toUpperCase()
-            ,json["emp_firstname"]
-            ,json["emp_lastname"]
-            ,json["emp_phone"]
-            ,json["emp_email"]
-            ,"1"
-            ,"1"]);
+            ,role_id) VALUES (?,?,?,?,?,?,?,?,?)`,
+          [
+            emp_id,
+            json["emp_username"],
+            md5(json["emp_password"]).toUpperCase(),
+            json["emp_firstname"],
+            json["emp_lastname"],
+            json["emp_phone"],
+            json["emp_email"],
+            "1",
+            json["role_id"],
+          ]
+        );
             
         
         res.send({

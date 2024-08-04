@@ -63,7 +63,9 @@ router.post('/get', async (req, res) => {
           LEFT JOIN mas_asset_type    AS ATY ON ATY.asset_type_id = ASS.asset_type_id
           LEFT JOIN mas_agency        AS AGE ON AGE.agency_id = ASS.agency_id
           LEFT JOIN mas_asset_status  AS AST ON AST.asset_status_id = ASS.asset_status_id
-          WHERE ${query_search} CONCAT_WS(' ', ASS.asset_code, ASS.asset_name ,ASS.asset_building_code)  LIKE '%' ? '%' LIMIT ? OFFSET ?`,[json['search'],pageSize,offset]);
+          WHERE ${query_search} CONCAT_WS(' ', ASS.asset_code, ASS.asset_name ,ASS.asset_building_code)  LIKE '%' ? '%' 
+          ORDER BY ASS.asset_code
+          LIMIT ? OFFSET ?`,[json['search'],pageSize,offset]);
           
 
         if (res_asset) {
@@ -255,6 +257,9 @@ router.post('/update', async (req, res) => {
       });
       return;
     }
+
+    console.log('json',json['asset_id']);
+    
 
     const [res_asset] = await kal_db.query(`SELECT * FROM trans_asset WHERE asset_id = ?`,[json["asset_id"]]);
     
