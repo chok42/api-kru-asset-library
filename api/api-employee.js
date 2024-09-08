@@ -127,7 +127,7 @@ router.post('/get', async (req, res) => {
       const [res_emp] = await kal_db.query(`
         SELECT EMP.*,ROL.role_name FROM mas_employee AS EMP 
         LEFT JOIN mas_role AS ROL ON ROL.role_id = EMP.role_id 
-        WHERE ${query_search} EMP.role_id != 1 AND EMP.emp_status = 1 AND CONCAT_WS(' ', EMP.emp_firstname, EMP.emp_lastname ,EMP.emp_username) LIKE '%' ? '%' LIMIT ? OFFSET ?`,[json['search'],pageSize,offset]);
+        WHERE ${query_search} EMP.role_id != 1 AND CONCAT_WS(' ', EMP.emp_firstname, EMP.emp_lastname ,EMP.emp_username) LIKE '%' ? '%' LIMIT ? OFFSET ?`,[json['search'],pageSize,offset]);
         
       if (res_emp) {
         
@@ -248,7 +248,7 @@ router.post('/insert', async (req, res) => {
             json["emp_lastname"],
             json["emp_phone"],
             json["emp_email"],
-            "1",
+            json["emp_status"],
             json["role_id"],
           ]
         );
@@ -264,6 +264,7 @@ router.post('/insert', async (req, res) => {
         res.send({ status: "500", message: 'ERROR',detail:err.message });
       }
 });
+
 //update
 router.post('/update', async (req, res) => {
   try {
@@ -281,6 +282,18 @@ router.post('/update', async (req, res) => {
     const [res_emp] = await kal_db.query(`SELECT * FROM mas_employee WHERE emp_id = ?`,[json["emp_id"]]);
     
     if (res_emp && res_emp.length > 0) {
+
+      let pass = "";
+
+      if (json["emp_new_password"]) {
+        let empNewPassword = md5(json["emp_new_password"]).toUpperCase();
+        if (json["emp_password"] !== empNewPassword) {
+          pass = empNewPassword;
+        }
+      } else {
+        pass = json["emp_password"];
+      }
+
       await kal_db.query(
         `
         UPDATE mas_employee SET emp_username = ?
@@ -290,16 +303,17 @@ router.post('/update', async (req, res) => {
         ,emp_phone = ?
         ,emp_email = ?
         ,emp_status = ?
-        ,role_id = ? WHERE asset_id = ?`,
+        ,role_id = ? WHERE emp_id = ?`,
         [
           json["emp_username"],
-          json["emp_password"],
+          pass,
           json["emp_firstname"],
           json["emp_lastname"],
           json["emp_phone"],
           json["emp_email"],
           json["emp_status"],
-          json["role_id"],       
+          json["role_id"],    
+          json["emp_id"],    
         ]
       );
 
@@ -336,7 +350,7 @@ router.post('/delete', async (req, res) => {
         return;
       } 
       
-      const [res_emp] = await kal_db.query(`SELECT * FROM mas_employee WHERE emp_id = ?`,[json["asset_id"]]);
+      const [res_emp] = await kal_db.query(`SELECT * FROM mas_employee WHERE emp_id = ?`,[json["emp_id"]]);
       if(res_emp && res_emp.length > 0){
         await kal_db.query(`DELETE FROM mas_employee WHERE emp_id = ?`,[json["emp_id"]]);     
 
