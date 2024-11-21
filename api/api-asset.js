@@ -299,8 +299,8 @@ router.post('/update', async (req, res) => {
           json["agency_id"],
           json["asset_type_id"],
           `images/${resAsset.asset_code}.png`,
-          json["asset_id"],  
-          json["emp_id"],        
+          json["emp_id"],       
+          json["asset_id"],   
         ]
       );
 
